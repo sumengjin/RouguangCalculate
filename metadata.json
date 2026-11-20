@@ -1,0 +1,6 @@
+{
+  "name": "柔光計算器 Atelier",
+  "description": "專為女性日常設計的質感計算工具，結合細緻觸感計算機、逛街折數與聚餐分帳、生理期推算與每日健康計算。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
