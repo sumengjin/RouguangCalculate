@@ -30,13 +30,12 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install Android SDK 36 and accept licenses
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          SDK_MANAGER="${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/sdkmanager"
+          set +o pipefail
+          yes | "$SDK_MANAGER" --licenses >/dev/null 2>&1
+          yes | "$SDK_MANAGER" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
