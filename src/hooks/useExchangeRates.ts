@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { writeNativePref, readNativePref } from '../utils/persistentStorage';
 
 interface RateCache {
   base: string;
@@ -61,6 +62,18 @@ export function useExchangeRates() {
     };
   });
 
+  useEffect(() => {
+    readNativePref<RateCache>(RATES_CACHE_KEY).then((nativeCache) => {
+      if (nativeCache && nativeCache.rates && nativeCache.rates.USD) {
+        setCache((prev) =>
+          nativeCache.fetchedAtMs > prev.fetchedAtMs
+            ? { ...nativeCache, source: 'cache' }
+            : prev
+        );
+      }
+    });
+  }, []);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -95,11 +108,7 @@ export function useExchangeRates() {
         source: 'live',
       };
       setCache(next);
-      try {
-        localStorage.setItem(RATES_CACHE_KEY, JSON.stringify(next));
-      } catch {
-        // ignore storage quota errors
-      }
+      void writeNativePref(RATES_CACHE_KEY, next);
     } catch {
       setError('無法連線取得即時匯率，目前使用本機快取或基準匯率');
     } finally {

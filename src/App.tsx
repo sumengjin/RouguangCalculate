@@ -13,8 +13,10 @@ import { CurrencyConverterTool } from './components/CurrencyConverterTool';
 import { CycleEstimatorTool } from './components/CycleEstimatorTool';
 import { WellnessTool } from './components/WellnessTool';
 import { useExchangeRates } from './hooks/useExchangeRates';
+import { usePersistedState } from './hooks/usePersistedState';
 
 const THEME_KEY = 'atelier_calc_theme_v1';
+const TAB_KEY = 'atelier_calc_active_tab_v1';
 const SOUND_KEY = 'atelier_calc_sound_v1';
 const HISTORY_KEY = 'atelier_calc_history_v1';
 
@@ -42,70 +44,22 @@ const TAB_DESCRIPTIONS: Record<ToolTab, { title: string; subtitle: string }> = {
 };
 
 export default function App() {
-  const [themeId, setThemeId] = useState<ThemeId>(() => {
-    try {
-      const saved = localStorage.getItem(THEME_KEY) as ThemeId | null;
-      if (saved && THEME_TOKENS[saved]) return saved;
-    } catch {
-      // ignore
-    }
-    return 'rose-porcelain';
-  });
+  const [themeId, setThemeId] = usePersistedState<ThemeId>(THEME_KEY, 'rose-porcelain');
+  const [activeTab, setActiveTab] = usePersistedState<ToolTab>(TAB_KEY, 'calculator');
+  const [soundEnabled, setSoundEnabled] = usePersistedState<boolean>(SOUND_KEY, true);
+  const [history, setHistory] = usePersistedState<HistoryItem[]>(HISTORY_KEY, []);
 
-  const [activeTab, setActiveTab] = useState<ToolTab>('calculator');
-
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem(SOUND_KEY);
-      if (saved !== null) return saved === 'true';
-    } catch {
-      // ignore
-    }
-    return true;
-  });
-
-  const [history, setHistory] = useState<HistoryItem[]>(() => {
-    try {
-      const saved = localStorage.getItem(HISTORY_KEY);
-      if (saved) return JSON.parse(saved) as HistoryItem[];
-    } catch {
-      // ignore
-    }
-    return [];
-  });
-
-  const tokens = THEME_TOKENS[themeId];
+  const tokens = THEME_TOKENS[themeId] ?? THEME_TOKENS['rose-porcelain'];
   const activePalette = THEME_PALETTES.find((p) => p.id === themeId);
   const fx = useExchangeRates();
 
   useEffect(() => {
-    try {
-      localStorage.setItem(THEME_KEY, themeId);
-    } catch {
-      // ignore
-    }
     if (activePalette?.isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [themeId, activePalette]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(SOUND_KEY, String(soundEnabled));
-    } catch {
-      // ignore
-    }
-  }, [soundEnabled]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    } catch {
-      // ignore
-    }
-  }, [history]);
+  }, [activePalette]);
 
   const handleAddHistory = useCallback((expression: string, result: string, note?: string) => {
     const item: HistoryItem = {

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Droplets, RotateCcw, ArrowRightLeft } from 'lucide-react';
 import { ThemeTokens } from '../constants/themes';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 interface WellnessToolProps {
   tokens: ThemeTokens;
@@ -15,39 +16,36 @@ const ACTIVITY_LEVELS = [
 
 const WATER_STORAGE_KEY = 'atelier_calc_water_v1';
 
-export const WellnessTool: React.FC<WellnessToolProps> = ({ tokens }) => {
-  const [heightCm, setHeightCm] = useState<string>('162');
-  const [weightKg, setWeightKg] = useState<string>('52');
-  const [age, setAge] = useState<string>('27');
-  const [activityFactor, setActivityFactor] = useState<number>(1.375);
+function getLocalDateStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
-  const [waterMl, setWaterMl] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem(WATER_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as { date: string; ml: number };
-        const todayStr = new Date().toISOString().slice(0, 10);
-        if (parsed.date === todayStr) return parsed.ml;
-      }
-    } catch {
-      // ignore
-    }
-    return 750;
-  });
+export const WellnessTool: React.FC<WellnessToolProps> = ({ tokens }) => {
+  const [heightCm, setHeightCm] = usePersistedState<string>('atelier_well_height_v1', '162');
+  const [weightKg, setWeightKg] = usePersistedState<string>('atelier_well_weight_v1', '52');
+  const [age, setAge] = usePersistedState<string>('atelier_well_age_v1', '27');
+  const [activityFactor, setActivityFactor] = usePersistedState<number>('atelier_well_activity_v1', 1.375);
+
+  const [waterRecord, setWaterRecord] = usePersistedState<{ date: string; ml: number }>(
+    WATER_STORAGE_KEY,
+    () => ({ date: getLocalDateStr(), ml: 0 })
+  );
+
+  const todayStr = getLocalDateStr();
+  const waterMl = waterRecord.date === todayStr ? waterRecord.ml : 0;
+  const setWaterMl = (updater: number | ((prev: number) => number)) => {
+    setWaterRecord((prev) => {
+      const current = prev.date === todayStr ? prev.ml : 0;
+      const nextVal = typeof updater === 'function' ? updater(current) : updater;
+      return { date: todayStr, ml: nextVal };
+    });
+  };
 
   // Skincare / daily unit converter
-  const [mlInput, setMlInput] = useState<string>('50');
-  const [ozInput, setOzInput] = useState<string>('1.69');
-  const [shoeCm, setShoeCm] = useState<string>('23.5');
-
-  useEffect(() => {
-    try {
-      const todayStr = new Date().toISOString().slice(0, 10);
-      localStorage.setItem(WATER_STORAGE_KEY, JSON.stringify({ date: todayStr, ml: waterMl }));
-    } catch {
-      // ignore
-    }
-  }, [waterMl]);
+  const [mlInput, setMlInput] = usePersistedState<string>('atelier_well_ml_v1', '50');
+  const [ozInput, setOzInput] = usePersistedState<string>('atelier_well_oz_v1', '1.69');
+  const [shoeCm, setShoeCm] = usePersistedState<string>('atelier_well_shoe_v1', '23.5');
 
   const h = Math.max(100, Math.min(220, parseFloat(heightCm) || 160));
   const w = Math.max(30, Math.min(180, parseFloat(weightKg) || 50));

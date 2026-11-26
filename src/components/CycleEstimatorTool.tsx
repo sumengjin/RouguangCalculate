@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Plus, Minus, Calendar } from 'lucide-react';
 import { ThemeTokens } from '../constants/themes';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 interface CycleEstimatorToolProps {
   tokens: ThemeTokens;
@@ -43,27 +44,11 @@ function getDefaultStartDate(): string {
 }
 
 export const CycleEstimatorTool: React.FC<CycleEstimatorToolProps> = ({ tokens }) => {
-  const [config, setConfig] = useState<CycleConfig>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved) as CycleConfig;
-    } catch {
-      // ignore storage errors
-    }
-    return {
-      lastStartDate: getDefaultStartDate(),
-      cycleLength: 28,
-      periodLength: 5,
-    };
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-    } catch {
-      // ignore
-    }
-  }, [config]);
+  const [config, setConfig] = usePersistedState<CycleConfig>(STORAGE_KEY, () => ({
+    lastStartDate: getDefaultStartDate(),
+    cycleLength: 28,
+    periodLength: 5,
+  }));
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);

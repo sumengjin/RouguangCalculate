@@ -6,6 +6,7 @@ import {
   getCurrencyMeta,
   formatCurrencyAmount,
 } from '../constants/currencies';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 interface ShoppingSplitToolProps {
   tokens: ThemeTokens;
@@ -30,26 +31,26 @@ export const ShoppingSplitTool: React.FC<ShoppingSplitToolProps> = ({
   onSaveToHistory,
 }) => {
   // Reference home currency for travel comparison
-  const [homeCurrency, setHomeCurrency] = useState<string>('TWD');
+  const [homeCurrency, setHomeCurrency] = usePersistedState<string>('atelier_shop_home_cur_v1', 'TWD');
 
   // Global Discount & Tax calculator state
-  const [shopCurrency, setShopCurrency] = useState<string>('USD');
-  const [originalPrice, setOriginalPrice] = useState<string>('120');
-  const [discountMode, setDiscountMode] = useState<'off' | 'fold'>('off');
-  const [offPercent, setOffPercent] = useState<number>(20); // 20 = 20% OFF (8折)
-  const [taxPercent, setTaxPercent] = useState<string>('0'); // positive = sales tax, negative = tax-free refund
-  const [thresholdAmount, setThresholdAmount] = useState<string>('');
-  const [thresholdDeduct, setThresholdDeduct] = useState<string>('');
+  const [shopCurrency, setShopCurrency] = usePersistedState<string>('atelier_shop_cur_v1', 'USD');
+  const [originalPrice, setOriginalPrice] = usePersistedState<string>('atelier_shop_price_v1', '120');
+  const [discountMode, setDiscountMode] = usePersistedState<'off' | 'fold'>('atelier_shop_mode_v1', 'off');
+  const [offPercent, setOffPercent] = usePersistedState<number>('atelier_shop_off_v1', 20);
+  const [taxPercent, setTaxPercent] = usePersistedState<string>('atelier_shop_tax_v1', '0');
+  const [thresholdAmount, setThresholdAmount] = usePersistedState<string>('atelier_shop_thresh_min_v1', '');
+  const [thresholdDeduct, setThresholdDeduct] = usePersistedState<string>('atelier_shop_thresh_ded_v1', '');
   const [savedNotice, setSavedNotice] = useState<boolean>(false);
 
   // Global Split bill state
-  const [billCurrency, setBillCurrency] = useState<string>('USD');
-  const [billAmount, setBillAmount] = useState<string>('96');
-  const [billTaxRate, setBillTaxRate] = useState<string>('0');
-  const [tipRate, setTipRate] = useState<number>(15);
-  const [customTip, setCustomTip] = useState<string>('12');
-  const [peopleCount, setPeopleCount] = useState<number>(4);
-  const [roundingMode, setRoundingMode] = useState<'exact' | 'roundInt' | 'ceilInt'>('exact');
+  const [billCurrency, setBillCurrency] = usePersistedState<string>('atelier_split_cur_v1', 'USD');
+  const [billAmount, setBillAmount] = usePersistedState<string>('atelier_split_amount_v1', '96');
+  const [billTaxRate, setBillTaxRate] = usePersistedState<string>('atelier_split_tax_v1', '0');
+  const [tipRate, setTipRate] = usePersistedState<number>('atelier_split_tip_v1', 15);
+  const [customTip, setCustomTip] = usePersistedState<string>('atelier_split_custom_tip_v1', '12');
+  const [peopleCount, setPeopleCount] = usePersistedState<number>('atelier_split_people_v1', 4);
+  const [roundingMode, setRoundingMode] = usePersistedState<'exact' | 'roundInt' | 'ceilInt'>('atelier_split_round_v1', 'exact');
   const [copiedSplit, setCopiedSplit] = useState<boolean>(false);
 
   // Discount math (supports global % OFF, tax/tax-free, and threshold rebate)

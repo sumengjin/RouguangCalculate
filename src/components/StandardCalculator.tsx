@@ -19,6 +19,7 @@ import {
   stripCommas,
 } from '../utils/mathEngine';
 import { playKeySound } from '../utils/sound';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 interface StandardCalculatorProps {
   tokens: ThemeTokens;
@@ -43,11 +44,11 @@ export const StandardCalculator: React.FC<StandardCalculatorProps> = ({
   onDeleteHistoryItem,
   onClearHistory,
 }) => {
-  const [expression, setExpression] = useState<string>('');
-  const [displayResult, setDisplayResult] = useState<string>('0');
-  const [justEvaluated, setJustEvaluated] = useState<boolean>(false);
+  const [expression, setExpression] = usePersistedState<string>('atelier_calc_expr_v1', '');
+  const [displayResult, setDisplayResult] = usePersistedState<string>('atelier_calc_res_v1', '0');
+  const [justEvaluated, setJustEvaluated] = usePersistedState<boolean>('atelier_calc_eval_v1', false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showScientific, setShowScientific] = useState<boolean>(false);
+  const [showScientific, setShowScientific] = usePersistedState<boolean>('atelier_calc_sci_v1', false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const livePreview = !justEvaluated && expression ? tryEvaluatePreview(expression) : null;

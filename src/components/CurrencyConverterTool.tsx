@@ -6,6 +6,7 @@ import {
   getCurrencyMeta,
   formatCurrencyAmount,
 } from '../constants/currencies';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 interface CurrencyConverterToolProps {
   tokens: ThemeTokens;
@@ -32,11 +33,11 @@ export const CurrencyConverterTool: React.FC<CurrencyConverterToolProps> = ({
   getRate,
   onSaveToHistory,
 }) => {
-  const [amountInput, setAmountInput] = useState<string>('100');
-  const [fromCode, setFromCode] = useState<string>('USD');
-  const [toCode, setToCode] = useState<string>('JPY');
-  const [useCustomRate, setUseCustomRate] = useState<boolean>(false);
-  const [customRateInput, setCustomRateInput] = useState<string>('');
+  const [amountInput, setAmountInput] = usePersistedState<string>('atelier_fx_amount_v1', '100');
+  const [fromCode, setFromCode] = usePersistedState<string>('atelier_fx_from_v1', 'USD');
+  const [toCode, setToCode] = usePersistedState<string>('atelier_fx_to_v1', 'JPY');
+  const [useCustomRate, setUseCustomRate] = usePersistedState<boolean>('atelier_fx_use_custom_v1', false);
+  const [customRateInput, setCustomRateInput] = usePersistedState<string>('atelier_fx_custom_rate_v1', '');
   const [copied, setCopied] = useState<boolean>(false);
   const [savedNotice, setSavedNotice] = useState<boolean>(false);
 
